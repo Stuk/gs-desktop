@@ -14,6 +14,8 @@ class MediaKeys(object):
 
     bus_obj = bus.get_object('org.gnome.SettingsDaemon',
       '/org/gnome/SettingsDaemon/MediaKeys')
+    bus_obj.GrabMediaPlayerKeys(
+            'gsdesktop', 0, dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
     bus_obj.connect_to_signal("MediaPlayerKeyPressed", self.keypress)
 
   def keypress(self, *keys):
