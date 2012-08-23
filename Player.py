@@ -1,10 +1,11 @@
+import jswebkit
 import webkit
 
 class Player(webkit.WebView):
   def __init__(self):
     webkit.WebView.__init__(self)
     self.open("http://listen.grooveshark.com/")
-    #self.connect("title-changed", self._title_changed_cb)
+    self.ctx = jswebkit.JSContext(self.get_main_frame().get_global_context())
 
   def play_pause(self):
     self.execute_script("document.getElementById('player_play_pause').click()")
@@ -17,16 +18,10 @@ class Player(webkit.WebView):
     self.execute_script("document.getElementById('player_previous').click()")
 
   def get_song(self):
-    # What a hack. The only way to pass info back to python is through the
-    # title of the page!
-    self.execute_script("""
-      np=document.getElementById('playerDetails_nowPlaying')
-      song=np.getElementsByClassName('song')[1].textContent
-      artist=np.getElementsByClassName('artist')[0].textContent
-      album=np.getElementsByClassName('album')[0].textContent
-      document.title = song+'||'+artist+'||'+album
-    """)
-
-    parts = self.get_main_frame().get_title().split('||')
-
-    return {"song": parts[0], "artist": parts[1], "album": parts[2]}
+    if self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').childElementCount"):
+      song = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('song')[0].textContent");
+      artist = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('artist')[0].textContent");
+      album = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('album')[0].textContent");
+      return {"song": song, "artist": artist, "album": album}
+    else:
+      return 'Not playing.'
