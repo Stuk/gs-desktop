@@ -11,7 +11,6 @@ class Player(webkit.WebView):
 
   def play_pause(self):
     self.execute_script("document.getElementById('player_play_pause').click()")
-    print self.get_song()
 
   def next(self):
     self.execute_script("document.getElementById('player_next').click()")
@@ -21,11 +20,14 @@ class Player(webkit.WebView):
 
   def get_song(self):
     if self.ctx.EvaluateScript("var p = document.getElementById('playerDetails_nowPlaying');p && p.childElementCount"):
-      song = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('song')[0].textContent");
-      artist = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('artist')[0].textContent");
-      album = self.ctx.EvaluateScript("document.getElementById('playerDetails_nowPlaying').getElementsByClassName('album')[0].textContent");
+      if self.ctx.EvaluateScript("document.querySelector('.player_control.play')"):
+        self.get_parent_window().set_title('Grooveshark - Paused')
+      else:
+        song = self.ctx.EvaluateScript("document.querySelector('#playerDetails_nowPlaying .song').textContent");
+        artist = self.ctx.EvaluateScript("document.querySelector('#playerDetails_nowPlaying .artist').textContent");
+        album = self.ctx.EvaluateScript("document.querySelector('#playerDetails_nowPlaying .album').textContent");
 
-      self.get_parent_window().set_title('Grooveshark - Playing: %s by %s on %s' % (song, artist, album))
+        self.get_parent_window().set_title('Grooveshark - Playing: %s by %s on %s' % (song, artist, album))
     else:
       self.get_parent_window().set_title('Grooveshark - Not Playing')
     
